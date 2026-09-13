@@ -1,0 +1,144 @@
+# LeetCode 835 — Image Overlap
+
+## Problem Statement
+
+Given two binary matrices `img1` and `img2`, shift `img1` in any direction and find the **maximum number of positions where both matrices contain `1`**.
+
+---
+
+## Approach
+
+1. Take every possible shift of `img1`.
+2. For each shift:
+
+   * Traverse every cell of `img1`.
+   * Only consider cells where `img1[i][j] == 1`.
+   * Calculate the shifted position:
+
+     * `newi = i + dy`
+     * `newj = j + dx`
+   * Check whether the new position is inside the matrix.
+   * If `img2[newi][newj] == 1`, increase `overlap`.
+3. After checking one complete shift, update `max_o`.
+4. Try all possible shifts.
+
+### Important Convention
+
+* `i` → row
+* `j` → column
+* `dy` → row shift
+* `dx` → column shift
+
+Therefore:
+
+```cpp
+newi = i + dy;
+newj = j + dx;
+```
+
+---
+
+## Time Complexity
+
+There are `(2n - 1)²` possible shifts.
+
+For every shift, we traverse `n²` cells.
+
+**Time: `O(n⁴)`**
+
+---
+
+## Space Complexity
+
+Only a few variables are used.
+
+**Space: `O(1)`**
+
+---
+
+## Code
+
+```cpp
+class Solution {
+public:
+    int largestOverlap(vector<vector<int>>& img1, vector<vector<int>>& img2) {
+        int n = img1.size();
+        int m = img1[0].size();
+        int max_o = 0;
+
+        for(int dx = -(n - 1); dx <= n - 1; dx++) {
+            for(int dy = -(m - 1); dy <= m - 1; dy++) {
+
+                int overlap = 0;
+
+                for(int i = 0; i < n; i++) {
+                    for(int j = 0; j < m; j++) {
+
+                        if(img1[i][j] == 1) {
+
+                            int newi = i + dy;
+                            int newj = j + dx;
+
+                            if(newi >= 0 && newi < n &&
+                               newj >= 0 && newj < m &&
+                               img2[newi][newj] == 1) {
+                                overlap++;
+                            }
+                        }
+                    }
+                }
+
+                max_o = max(max_o, overlap);
+            }
+        }
+
+        return max_o;
+    }
+};
+```
+
+## Mistakes & Learning
+
+### Mistake 1 — Variable Scope
+
+I declared `newi` and `newj` inside:
+
+```cpp
+if(img1[i][j] == 1)
+```
+
+but tried to use them outside that block.
+
+**Learning:** A variable can only be accessed inside the `{ }` where it is declared.
+
+### Mistake 2 — Unnecessary Initialization
+
+I initially thought `newi` and `newj` needed to start from `0`.
+
+But:
+
+```cpp
+int newi = i + dy;
+```
+
+already directly assigns the required value.
+
+It does **not accumulate** the previous value.
+
+### Mistake 3 — Checking `img2` when `img1[i][j] == 0`
+
+If the current cell of `img1` is `0`, it cannot contribute to overlap.
+
+So `newi/newj` calculation and `img2` checking should happen only inside:
+
+```cpp
+if(img1[i][j] == 1)
+```
+
+---
+
+## Optimization
+
+Current solution is **`O(n⁴)`**, which is acceptable for the given constraints.
+
+A more optimized approach can use the positions of `1`s and count relative shifts, reducing unnecessary matrix traversal.
